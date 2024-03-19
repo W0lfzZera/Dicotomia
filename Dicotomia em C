@@ -1,0 +1,113 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+void aloca(float **p_valor, int tam);
+float funcao(float ponto, int grau, float *p_valor);
+float valork(float ponto_1, float ponto_2, float erro);
+void cabecalho_tabela();
+void tabela(int interacoes, float ponto_1, float ponto_2, float media, float funcao_a, float funcao_b, float funcao_m, float fafm, float fbfm);
+
+int main()
+{
+	int i, grau, interacoes;
+	float intervalo_1, intervalo_2, erro, funcao_a, funcao_b, funcao_m, k, m;
+	float *p_valor = NULL;
+	printf("\nDigite o grau da funcao (2 a 6): ");
+	scanf("%d", &grau);
+	aloca(&p_valor, grau);
+	for(i = grau; i >= 0; i--)
+	{
+		printf("\nDigite o fator multiplicador de x^%d(%c): ", i, 65 + (grau - i));
+		scanf("%f", (p_valor + i));
+	}
+	printf("\nA funcao recebida foi: ");
+	for(i = grau; i >= 0; i--)
+	{
+		if(i == 0)
+		{
+			printf("%.2f = 0", *(p_valor + i));
+		}
+		else
+		{
+			printf("%.2fx^%d + ", *(p_valor + i), i);
+		}
+	}
+	printf("\n\nDigite o valor dos intervalos da funcao (A e B): ");
+	scanf("%f %f", &intervalo_1, &intervalo_2);
+	printf("\nDigite o valor do erro da funcao: ");
+	scanf("%f", &erro);
+	printf("\n\n");
+	system("pause");
+	printf("\n\nVerificando se a dicotomia eh valida:\n");
+	funcao_a = funcao(intervalo_1, grau, p_valor);
+	funcao_b = funcao(intervalo_2, grau, p_valor);
+	if(funcao_a * funcao_b < 0)
+	{
+		printf("\nEh valida, verifique como ficou a tabela abaixo:\n\n");
+		cabecalho_tabela();
+		k = valork(intervalo_1, intervalo_2, erro);
+		while(k >= interacoes)
+		{
+			m = (intervalo_1 + intervalo_2) / 2;
+			funcao_m = funcao(m, grau, p_valor);
+			tabela(interacoes, intervalo_1, intervalo_2, m, funcao_a, funcao_b, funcao_m, (funcao_a * funcao_m), (funcao_b * funcao_m));
+			if(funcao_a * funcao_m < 0)
+			{
+				intervalo_2 = m;
+			}
+			else if(funcao_b * funcao_m < 0)
+			{
+				intervalo_1 = m;
+			}
+			funcao_a = funcao(intervalo_1, grau, p_valor);
+			funcao_b = funcao(intervalo_2, grau, p_valor);
+			interacoes = interacoes + 1;
+		}
+	}
+	else
+	{
+		printf("\nA dicotomia nao eh valida.");
+		return 1;
+	}
+	printf("\n");
+	system("pause");
+	return 0;
+}
+
+void aloca(float **p_valor, int tam)
+{
+	if((*p_valor = (float*) malloc(tam * sizeof(float))) == NULL)
+	{
+		exit(1);
+	}
+}
+
+float funcao(float ponto, int grau, float *p_valor)
+{
+	int i;
+	float resultado = 0;
+	for(i = grau; i >= 0; i--)
+	{
+		resultado = resultado + (*(p_valor + i) * pow(ponto, i));
+	}
+	return resultado;
+}
+
+float valork(float ponto_1, float ponto_2, float erro)
+{
+	float k;
+	k = (log10(ponto_2 - ponto_1) - log10(erro)) / log10(2);
+	return ceil(k);
+}
+
+void cabecalho_tabela()
+{
+	printf("I | a\t| b\t| m\t| f(a)\t| f(b)\t| f(m)\t| fa*fm\t| fm*fb\t|\n");
+	printf("--+-----+-------+-------+-------+-------+-------+-------+-------+\n");
+}
+
+void tabela(int interacoes, float ponto_1, float ponto_2, float media, float funcao_a, float funcao_b, float funcao_m, float fafm, float fbfm)
+{
+	printf("%i |%.2f |%.2f\t|%.2f\t|%.2f\t|%.2f\t|%.2f\t|%.2f\t|%.2f\t|\n", interacoes, ponto_1, ponto_2, media, funcao_a, funcao_b, funcao_m, fafm, fbfm);
+}
